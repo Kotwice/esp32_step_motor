@@ -24,7 +24,9 @@ AsyncWebServer server(80);
 
 SM_PROPORTIES engine = {1.8, {0.5, 0.1, 3}};
 
-std::vector<SM> Engines {{engine, SM1_DIR, SM1_STP, SM1_SLP, SM1_RST}};
+std::vector<SM> Engines {
+    {engine, SM1_DIR, SM1_STP, SM1_SLP, SM1_RST}
+};
 
 struct WebFile {
     String url, path, type;
@@ -109,12 +111,12 @@ void initiate_web () {
         webfile.url.toCharArray(url, webfile.url.length() + 1);
 
         if (webfile.url == "/index.html") {
-            server.on("/", HTTP_GET, [=](AsyncWebServerRequest *request) {
+            server.on("/", HTTP_GET, [webfile](AsyncWebServerRequest *request) {
                 request->send(SPIFFS, webfile.path, String(), false);
             });  
         }
         else {
-            server.on(url, HTTP_GET, [=](AsyncWebServerRequest *request) {
+            server.on(url, HTTP_GET, [webfile](AsyncWebServerRequest *request) {
                 request->send(SPIFFS, webfile.path, webfile.type);
             }); 
         }
@@ -122,11 +124,21 @@ void initiate_web () {
     }
     
     server.on("/sm", HTTP_GET, [](AsyncWebServerRequest *request) {
-        
-        /*
-        for (std::vector<SM>::iterator Engine = Engines.begin(); Engine == Engines.end(); Engine++) {
-            if (request->hasParam("sm_freq_1") & request->hasParam("sm_state_1")) {
+
+        for (std::vector<SM>::iterator Engine = Engines.begin(); Engine != Engines.end(); Engine++) {
+            if (request->hasParam("sm_freq_1")) {
                 Engine->frequency = request->getParam("sm_freq_1")->value().toFloat();
+                if (request->hasParam("sm_state_1")) {
+                    Engine->state = request->getParam("sm_state_1")->value();
+                    if (Engine->state == "ON") {
+                        Engine->move();
+                    }
+                    else {
+                        Engine->stop();
+                    }
+                }
+            }
+            if (request->hasParam("sm_state_1")) {
                 Engine->state = request->getParam("sm_state_1")->value();
                 if (Engine->state == "ON") {
                     Engine->move();
@@ -136,68 +148,7 @@ void initiate_web () {
                 }
             }
         }
-        */
-        /*
-        for (SM Engine: Engines) {
-            Engine.frequency = request->getParam("sm_freq_1")->value().toFloat();
-            Engine.state = request->getParam("sm_state_1")->value();
-            if (Engine.state == "ON") {
-                Engine.move();
-            }
-            else {
-                Engine.stop();
-            }
-        }
-        */
 
-        /*
-        for (int i = 0; i <= Engines.size(); i++) {
-            Engines.at(i).frequency = request->getParam("sm_freq_1")->value().toFloat();
-            Engines.at(i).state = request->getParam("sm_state_1")->value();
-            if (Engines.at(i).state == "ON") {
-                Engines.at(i).move();
-            }
-            else {
-                Engines.at(i).stop();
-            }
-        }
-        */
-        
-        std::vector<SM>::iterator Engine = Engines.begin();
-        /*
-        if (request->hasParam("sm_freq_1") && request->hasParam("sm_state_1")) {
-            Engine->frequency = request->getParam("sm_freq_1")->value().toFloat();
-            Engine->state = request->getParam("sm_state_1")->value();
-            if (Engine->state == "ON") {
-                Engine->move();
-            }
-            else {
-                Engine->stop();
-            }
-        }
-        */
-        
-        if (request->hasParam("sm_freq_1")) {
-            Engine->frequency = request->getParam("sm_freq_1")->value().toFloat();
-            if (Engine->state == "ON") {
-                Engine->move();
-            }
-            else {
-                Engine->stop();
-            }
-        }
-
-        if (request->hasParam("sm_state_1")) {
-            Engine->state = request->getParam("sm_state_1")->value();
-            if (Engine->state == "ON") {
-                Engine->move();
-            }
-            else {
-                Engine->stop();
-            }
-        }
-        
-        
         String response = "[";
 
         for (SM Engine: Engines) {
