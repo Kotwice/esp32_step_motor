@@ -1,65 +1,46 @@
 #include <Arduino.h>
-#include <SM.h>
-#include <TC.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <vector>
-//#include <WS.h>
 
-const char* ssid = "Extruder";
-const char* password = "TerraNocturne";
+#include <SM.h>
+#include <TC.h>
 
-IPAddress local_ip(192, 168, 1, 1);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
-
-AsyncWebServer server(80);
-
-#define SM1_DIR 0
-#define SM1_STP 27
-#define SM1_SLP 26
-#define SM1_RST 0
-
-#define SM2_DIR 0
-#define SM2_STP 21
-#define SM2_SLP 14
-#define SM2_RST 0
-
-#define SPITC_MISO 25
-#define SPITC_SCK 32
-#define SPITC_CS_1 33
-#define SPITC_CS_2 35
-
-#define HTML_OK 200
-
-hw_timer_t * timer = NULL;
-
-std::vector<TC> Thermocouples {
-    {SPITC_SCK, SPITC_MISO, SPITC_CS_1}, {SPITC_SCK, SPITC_MISO, SPITC_CS_2}
-};
-
-
-TC tc(SPITC_SCK, SPITC_MISO, SPITC_CS_1);
-
-
-SM_PROPORTIES engine = {1.8, {0.5, 0.1, 3}};
-
-std::vector<SM> Engines {
-    {engine, SM1_DIR, SM1_STP, SM1_SLP, SM1_RST, "1", 0},
-    {engine, SM2_DIR, SM2_STP, SM2_SLP, SM2_RST, "2", 8}
-};
-
-struct WebFile {
+typedef struct {
     String url, path, type;
+} WebFile;
+
+typedef struct {
+    std::vector<SM> Engines;
+    std::vector<TC> Thermocouples;
+} Periphery;
+
+class WS {
+    public:
+        WS(Periphery periphery);
+        std::vector<String> pathes;
+        std::vector<WebFile> webfiles;
+        std::vector<SM> Engines;
+        std::vector<TC> Thermocouples;
+        void get_pathes (fs::FS &fs, const char * dirname, uint8_t levels);
+        void initate_file_system ();
+        void initialte_web ();
+        Periphery periphery;
+        const char* ssid = "Extruder";
+        const char* password = "TerraNocturne";
+
+        IPAddress local_ip(192, 168, 1, 1);
+        IPAddress gateway(192, 168, 1, 1);
+        IPAddress subnet(255, 255, 255, 0);
+        AsyncWebServer server(80);
 };
 
-std::vector<String> pathes;
 
-std::vector<WebFile> webfiles;
+void WS::get_pathes(fs::FS &fs, const char * directory, uint8_t levels){
 
-void get_pathes(fs::FS &fs, const char * dirname, uint8_t levels){
-    File root = fs.open(dirname);
+    File root = fs.open(directory);
+
     if(!root){
         return;
     }
@@ -68,6 +49,7 @@ void get_pathes(fs::FS &fs, const char * dirname, uint8_t levels){
     }
 
     File file = root.openNextFile();
+
     while(file){
         if(file.isDirectory()){
             if(levels){
@@ -78,16 +60,13 @@ void get_pathes(fs::FS &fs, const char * dirname, uint8_t levels){
         }
         file = root.openNextFile();
     }
+
 }
 
 
-void initiate_file_system () {
-
-    Serial.println("start");
+void WS::initiate_file_system () {
 
     SPIFFS.begin();
-
-    Serial.println("load spiffs");
 
     get_pathes(SPIFFS, "/", 0);
 
@@ -142,8 +121,6 @@ void initiate_web () {
         }
 
     }
-
-    Serial.println("load data wifi");
     
     server.on("/sm", HTTP_GET, [](AsyncWebServerRequest *request) {
 
@@ -213,43 +190,5 @@ void initiate_web () {
     });
 
     server.begin();
-
-    Serial.println("begin server");
-
-}
-
-void IRAM_ATTR timerhandle () {
-
-    for (std::vector<TC>::iterator Thermocouple = Thermocouples.begin(); 
-        Thermocouple != Thermocouples.end(); Thermocouple++) {
-            Thermocouple->probe();
-            Serial.println(Thermocouple->value);
-        }
-    
-}
-
-void setup() {
-
-    Serial.begin(9600);
-
-    float duration = 2;
-
-    timer = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer, &timerhandle, true);
-    timerAlarmWrite(timer, duration * 1e6, true);
-
-    timerAlarmEnable(timer);
-
-    //initiate_web();
-    pinMode(SM2_SLP, OUTPUT);
-    digitalWrite(SM2_SLP, HIGH);
-    ledcAttachPin(SM2_STP, 0);
-    ledcSetup(0, 4 * 360 / 1.8, 8);
-    ledcWrite(0, 255);
-
-    Serial.println("end");
-}
-
-void loop() {
 
 }

@@ -4,6 +4,10 @@ struct range_frequency {
     float min, step, max;
 };
 
+struct Names {
+    String frequency, state;
+};
+
 struct SM_PROPORTIES {
     float step_angle;
     struct range_frequency range;
@@ -12,7 +16,7 @@ struct SM_PROPORTIES {
 class SM {
 
     public:
-        SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst);
+        SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst, String nm, int pwmchannel);
         void reset();
         void rotate(float duration);
         void stop();
@@ -21,6 +25,7 @@ class SM {
         float frequency = 0;
         struct range_frequency range;
         String state = "OFF";
+        struct Names name;
 
     private:
         int pin_direction, pin_step, pin_sleep, pin_reset;

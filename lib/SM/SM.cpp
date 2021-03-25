@@ -1,22 +1,27 @@
 #include <SM.h>
 
-SM::SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst) {
+SM::SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst, String nm, int pwmchannel) {
 
     step_angle = motor.step_angle;
     range = motor.range;
+
+    name.frequency = "sm_frequency_" + nm;
+    name.state = "sm_state_" + nm;
+
+    pwm_channel = pwmchannel;
 
     pin_direction = dir;
     pin_step = stp;
     pin_sleep = slp;
     pin_reset = rst;
 
-    pinMode(pin_direction, OUTPUT);
+    //pinMode(pin_direction, OUTPUT);
     pinMode(pin_sleep, OUTPUT);
-    pinMode(pin_reset, OUTPUT);
+    //pinMode(pin_reset, OUTPUT);
 
-    digitalWrite(pin_direction, HIGH);
+    //digitalWrite(pin_direction, HIGH);
     digitalWrite(pin_sleep, LOW);
-    digitalWrite(pin_reset, HIGH);
+    //digitalWrite(pin_reset, HIGH);
 
     ledcAttachPin(pin_step, pwm_channel);
 

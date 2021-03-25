@@ -6,13 +6,17 @@ labels[0] = document.getElementById('label-1');
 switches[0] = document.getElementById('switch-1');
 sliders[0] = document.getElementById('slider-1');
 
+labels[1] = document.getElementById('label-2');
+switches[1] = document.getElementById('switch-2');
+sliders[1] = document.getElementById('slider-2');
+
 sliders[0].oninput = function () { 
     labels[0].innerHTML = 'Частота ' + this.value + ' [Гц]';
 }
 
 sliders[0].onchange = function () {
     var xhttp = new XMLHttpRequest();
-    xhttp.open('GET', '/sm?sm_freq_1=' + this.value, true);
+    xhttp.open('GET', '/sm?sm_frequency_1=' + this.value, true);
     xhttp.send();
 }
 
@@ -23,6 +27,27 @@ switches[0].onchange = function () {
     }
     else {
         xhttp.open('GET', '/sm?sm_state_1=OFF', true);
+    }
+    xhttp.send();
+};
+
+sliders[1].oninput = function () { 
+    labels[1].innerHTML = 'Частота ' + this.value + ' [Гц]';
+}
+
+sliders[1].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/sm?sm_frequency_2=' + this.value, true);
+    xhttp.send();
+}
+
+switches[1].onchange = function () {
+    var xhttp = new XMLHttpRequest();    
+    if (switches[1].checked) {
+        xhttp.open('GET', '/sm?sm_state_2=ON', true);
+    }
+    else {
+        xhttp.open('GET', '/sm?sm_state_2=OFF', true);
     }
     xhttp.send();
 };
@@ -38,9 +63,7 @@ function sm_initiate () {
             data = JSON.parse(data);            
             for (let i = 0; i < data.length; i++) {
 
-                sliders[i].value = data[i].sm_freq;
-
-                //sliders[i].setAttribute('value', data[i].sm_freq);
+                sliders[i].setAttribute('value', data[i].frequency);
                 sliders[i].setAttribute('min', data[i].min);
                 sliders[i].setAttribute('max', data[i].max);
                 sliders[i].setAttribute('step', data[i].step);
