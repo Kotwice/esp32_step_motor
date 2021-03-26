@@ -22,7 +22,7 @@ AsyncWebServer server(80);
 #define SM1_RST 0
 
 #define SM2_DIR 0
-#define SM2_STP 21
+#define SM2_STP 12
 #define SM2_SLP 14
 #define SM2_RST 0
 
@@ -240,14 +240,8 @@ void setup() {
 
     timerAlarmEnable(timer);
 
-    //initiate_web();
-    pinMode(SM2_SLP, OUTPUT);
-    digitalWrite(SM2_SLP, HIGH);
-    ledcAttachPin(SM2_STP, 0);
-    ledcSetup(0, 4 * 360 / 1.8, 8);
-    ledcWrite(0, 255);
+    initiate_web();
 
-    Serial.println("end");
 }
 
 void loop() {
