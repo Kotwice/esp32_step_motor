@@ -1,110 +1,143 @@
-/*LABELS-PID*/
 
-var labels = new Array();
+var inputs = new Array();
 
-labels[0] = document.getElementById('label-1');
-labels[1] = document.getElementById('label-2');
-labels[2] = document.getElementById('label-3');
+inputs[0] = document.getElementById('input-1-i');
+inputs[1] = document.getElementById('input-1-p');
+inputs[2] = document.getElementById('input-1-d');
+inputs[3] = document.getElementById('input-1-destination');
 
-/*SLIDERS-PID*/
+inputs[4] = document.getElementById('input-2-i');
+inputs[5] = document.getElementById('input-2-p');
+inputs[6] = document.getElementById('input-2-d');
+inputs[7] = document.getElementById('input-2-destination');
 
-var sliders = new Array();
-
-sliders[0] = document.getElementById('slider-1');
-sliders[1] = document.getElementById('slider-2');
-sliders[2] = document.getElementById('slider-3');
-
-sliders[0].oninput = function () {
-    labels[0].innerHTML = 'Kp: ' + this.value;
+/*
+inputs[0].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_i_1=' + inputs[0].value, true);
+    xhttp.send();
 }
 
-sliders[1].oninput = function () {
-    labels[1].innerHTML = 'Ki: ' + this.value;
+inputs[1].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_p_1=' + this.value, true);
+    xhttp.send();
 }
 
-sliders[2].oninput = function () {
-    labels[2].innerHTML = 'Kd: ' + this.value;
+inputs[2].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_d_1=' + this.value, true);
+    xhttp.send();
 }
 
-/*INPUT-PID*/
+inputs[3] .onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_destination_1=' + this.value, true);
+    xhttp.send();
+}
 
-var input = document.getElementById('input');
+inputs[4].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_i_2=' + this.value, true);
+    xhttp.send();
+}
 
-/*SWITCHES-PID*/
+inputs[5].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_p_2=' + this.value, true);
+    xhttp.send();
+}
 
+inputs[6].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_d_2=' + this.value, true);
+    xhttp.send();
+}
+
+inputs[7].onchange = function () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open('GET', '/hs?pid_destination_2=' + this.value, true);
+    xhttp.send();
+}
+*/
 var switches = new Array();
 
 switches[0] = document.getElementById('switch-1');
 switches[1] = document.getElementById('switch-2');
 
 switches[0].onchange = function () {
-    var xhttp = new XMLHttpRequest();
-    if (!switches[0].checked) {   
-        sliders[0].disabled = true;
-        sliders[1].disabled = true;
-        sliders[2].disabled = true;
-        input.disabled = true;
-        $('.slider').toggleClass('slider-disable');
-        $('.input').toggleClass('input-disable');     
-        setpoint = input.value;
-        xhttp.open('GET', '/pid?kp=' + sliders[0].value + 
-            '&ki=' + sliders[1].value + '&kd=' + sliders[2].value + '&setpoint=' + input.value, true);
-        xhttp.send();
+    var xhttp = new XMLHttpRequest();    
+    if (switches[0].checked) {
+        xhttp.open('GET', '/hs?pid_state_1=on', true);
     }
     else {
-        sliders[0].disabled = false;
-        sliders[1].disabled = false;
-        sliders[2].disabled = false;
-        input.disabled = false;
-        $('.slider').toggleClass('slider-disable', false);
-        $('.input').toggleClass('input-disable', false);
+        xhttp.open('GET', '/hs?pid_state_1=off', true);
     }
+    xhttp.send();
 };
 
 switches[1].onchange = function () {
     var xhttp = new XMLHttpRequest();    
     if (switches[1].checked) {
-        xhttp.open('GET', '/pid?pid_state=ON', true);
+        xhttp.open('GET', '/hs?pid_state_2=on', true);
     }
     else {
-        xhttp.open('GET', '/pid?pid_state=OFF', true);
+        xhttp.open('GET', '/hs?pid_state_2=off', true);
     }
     xhttp.send();
 };
 
-/*INI-PID*/
+function hs_initiate () {
 
-function pid_ini () {
     var xhttp = new XMLHttpRequest();
+
     xhttp.onreadystatechange = function() {
+
         if (this.readyState == 4 && this.status == 200) {
+
             var data = this.responseText;
+
             data = data.replace(/'/g, '"');            
             data = JSON.parse(data);
-            sliders[0].value = data[0].kp;
-            sliders[1].value = data[0].ki;       
-            sliders[2].value = data[0].kd;   
-            input.value = data[0].setpoint;
-            labels[0].innerHTML = 'Kp: ' + sliders[0].value;
-            labels[1].innerHTML = 'Ki: ' + sliders[1].value;
-            labels[2].innerHTML = 'Kd: ' + sliders[2].value;
-            if (data[0].pid_state == 'ON') {
-                switches[1].checked = true;
+
+            inputs[0].value = data[0].i;
+            inputs[1].value = data[0].p;
+            inputs[2].value = data[0].d;
+            inputs[3].value = data[0].destination;
+
+            inputs[4].value = data[1].i;
+            inputs[5].value = data[1].p;
+            inputs[6].value = data[1].d;
+            inputs[7].value = data[1].destination;
+
+            if (data[0].state == 'on') {
+
+                switches[0].checked = true;
+
             }
             else {
+
+                switches[0].checked = false;
+
+            } 
+
+            if (data[1].state == 'on') {
+
+                switches[1].checked = true;
+
+            }
+            else {
+
                 switches[1].checked = false;
-            }                
+
+            }     
+       
         }
     };
-    xhttp.open('GET', '/pid_ini', true);
+
+    xhttp.open('GET', '/hs_initiate', true);
     xhttp.send();
-    sliders[0].disabled = true;
-    sliders[1].disabled = true;
-    sliders[2].disabled = true;
-    input.disabled = true;
-    switches[0].checked = false;
-    $('.slider').toggleClass('slider-disable');
-    $('.input').toggleClass('input-disable');
+
 }
 
-pid_ini();
+hs_initiate();

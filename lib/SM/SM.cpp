@@ -20,11 +20,8 @@ void SM::rotate(float FREQUENCY) {
 
     frequency = FREQUENCY;
 
-    digitalWrite(pin_sleep, HIGH);
-
     ledcSetup(pwm_channel, frequency * 360 / step_angle, resolution);
     ledcWrite(pwm_channel, dutyCycle);
-
 
 }
 

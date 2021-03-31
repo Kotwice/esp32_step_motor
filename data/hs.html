@@ -2,44 +2,58 @@
 
     <div>
 
-        <p>Настройка параметров регулирования</p> 
+        <p>Настройка параметров регулирования 1-го нагревателя</p> 
 
-        <input class = 'slider' type = 'range' id = 'slider-1' name = 'slider-1' min = '0' max = '10' step = '.1'>
-        <label for = 'slider-1' id = 'label-1' class = 'label'></label>   
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-i' id = 'input-1-i'>
+        <label class = 'label' for = 'input-1-i'>Ki</label>
 
-        <input class = 'slider' type = 'range' id = 'slider-2' name = 'slider-2' min = '0' max = '15' step = '.1'>
-        <label for = 'slider-2' id = 'label-2' class = 'label'></label>  
-        
-        <input class = 'slider' type = 'range' id = 'slider-3' name = 'slider-3' min = '0' max = '15' step = '.1'>
-        <label for = 'slider-3' id = 'label-3' class = 'label'></label>  
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-p' id = 'input-1-p'>
+        <label class = 'label' for = 'input-1-p'>Kd</label>
 
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input' id = 'input'>
-        <label class = 'label' for = 'input'>Точка регулирования</label>
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-d' id = 'input-1-d'>
+        <label class = 'label' for = 'input-1-d'>Kd</label>
 
-    </div>
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-destination' id = 'input-1-destination'>
+        <label class = 'label' for = 'input-1-destination'>Точка регулирования</label>
 
-    <div>
-
-        <p>Активация ввода</p>
+        <p>Включение 1-го нагревателя</p>
 
         <p>
             <label class = 'switch'>
                 <input id = 'switch-1' type = 'checkbox'>
-                <span class = 'switch-slider'></span>
-            </label>  
-        </p>
-        
-        <p>Включение нагревателя</p>
-
-        <p>
-            <label class = 'switch'>
-                <input id = 'switch-2' type = 'checkbox'>
                 <span class = 'switch-slider'></span>
             </label>
         </p>
 
     </div>
     
+    <div>
+
+        <p>Настройка параметров регулирования 2-го нагревателя</p> 
+    
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-i' id = 'input-2-i'>
+        <label class = 'label' for = 'input-2-i'>Ki</label>
+    
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-p' id = 'input-2-p'>
+        <label class = 'label' for = 'input-2-p'>Kd</label>
+    
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-d' id = 'input-2-d'>
+        <label class = 'label' for = 'input-2-d'>Kd</label>
+    
+        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-destination' id = 'input-2-destination'>
+        <label class = 'label' for = 'input-2-destination'>Точка регулирования</label>
+    
+        <p>Включение 2-го нагревателя</p>
+    
+        <p>
+            <label class = 'switch'>
+                <input id = 'switch-2' type = 'checkbox'>
+                <span class = 'switch-slider'></span>
+            </label>
+        </p>
+    
+    </div>
+
 </main>
 
 <script src = 'hs.js'></script>

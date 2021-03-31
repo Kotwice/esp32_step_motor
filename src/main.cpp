@@ -26,7 +26,7 @@ AsyncWebServer server(80);
 
 #define SM2_PIN_STEP 12
 #define SM2_PIN_SLEEP 14
-#define SM2_PWM_CHANNEL 8
+#define SM2_PWM_CHANNEL 10
 
 #define SPITC_MISO 25
 #define SPITC_SCK 32
@@ -35,18 +35,19 @@ AsyncWebServer server(80);
 
 #define LCS_PWM 23
 #define LCS_RELAY 13
+#define LCS_PWM_CHANNEL 4
 
-#define HT1_PIN_PWM 0
-#define HT2_PIN_PWM 0
+#define HT1_PIN_PWM 18
+#define HT2_PIN_PWM 19
 
-#define HT1_PWM_CHANNEL 0
-#define HT2_PWM_CHANNEL 0
+#define HT1_PWM_CHANNEL 6
+#define HT2_PWM_CHANNEL 8
 
 #define HTML_OK 200
 
 hw_timer_t * timer = NULL;
 
-LCS Cooler (LCS_RELAY, LCS_PWM, 6);
+LCS Cooler (LCS_RELAY, LCS_PWM, LCS_PWM_CHANNEL);
 
 std::vector<TC> Thermocouples {
     {SPITC_SCK, SPITC_MISO, SPITC_CS_1, "1"}, 
@@ -63,7 +64,9 @@ std::vector<HT> Heaters {
     {HT2_PIN_PWM, HT2_PWM_CHANNEL, "2"}
 };
 
-std::vector<PID> Regulators;
+std::vector<PID> Regulators {
+    {200, 1, 0.5, 0.5, 0.5, "1"}, {180, 1, 0.5, 0.5, 0.5, "2"}
+};
 
 struct WebFile {
     String url, path, type;
@@ -159,7 +162,7 @@ void initiate_web () {
         for (std::vector<SM>::iterator Engine = Engines.begin(); Engine != Engines.end(); Engine++) {
 
             if (request->hasParam(Engine->parameters.frequency)) {
-                 Engine->rotate(
+                Engine->rotate(
                     request->getParam(Engine->parameters.frequency)->value().toFloat()
                 );
             }
@@ -262,10 +265,10 @@ void initiate_web () {
         for (PID Regulator: Regulators) {
 
             String temporary = "{'i': " + String(Regulator.coefficients.i) + ", " + 
-                "'p': " + "'" + String(Regulator.coefficients.p) + "'" + 
-                "'d': " + "'" + String(Regulator.coefficients.d) + "'" + 
-                "'destination': " + "'" + String(Regulator.destination) + "'" + 
-                "'state': " + "'" + String(Regulator.state) + "'" + 
+                "'p': " + String(Regulator.coefficients.p) + ", " + 
+                "'d': " + String(Regulator.coefficients.d) + ", " + 
+                "'destination': " + String(Regulator.destination) + ", " + 
+                "'state': " + String(Regulator.state) + "'" + 
                 "}, ";
             response = response + temporary;
         }
