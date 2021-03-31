@@ -15,4 +15,12 @@ $(document).ready(function () {
         $('.sidebarBth').toggleClass('toggle');
         $('.contentbar').load('sm.html');                      
     });
+    $('.item-2').click(function () {
+        $('.sidebar').toggleClass('sidebar-close');
+        $('.sidebar').toggleClass('sidebar-open', false);               
+        $('.contentbar').toggleClass('contentbar-open');
+        $('.contentbar').toggleClass('contentbar-close', false); 
+        $('.sidebarBth').toggleClass('toggle');
+        $('.contentbar').load('lcs.html');                      
+    });
 })

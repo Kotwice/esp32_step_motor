@@ -52,8 +52,6 @@ switches[1].onchange = function () {
     xhttp.send();
 };
 
-/*INI-SM*/
-
 function sm_initiate () {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {        

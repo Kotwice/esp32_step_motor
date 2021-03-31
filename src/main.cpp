@@ -5,6 +5,8 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFS.h>
 #include <vector>
+#include <LCS.h>
+
 //#include <WS.h>
 
 const char* ssid = "Extruder";
@@ -29,7 +31,10 @@ AsyncWebServer server(80);
 #define SPITC_MISO 25
 #define SPITC_SCK 32
 #define SPITC_CS_1 33
-#define SPITC_CS_2 35
+#define SPITC_CS_2 13
+
+#define LCS_PWM 23
+#define LCS_RELAY 13
 
 #define HTML_OK 200
 
@@ -44,6 +49,8 @@ TC tc(SPITC_SCK, SPITC_MISO, SPITC_CS_1);
 
 
 SM_PROPORTIES engine = {1.8, {0.5, 0.1, 3}};
+
+LCS Cooler (LCS_RELAY, LCS_PWM, 6);
 
 std::vector<SM> Engines {
     {engine, SM1_DIR, SM1_STP, SM1_SLP, SM1_RST, "1", 0},
@@ -212,9 +219,48 @@ void initiate_web () {
         request->send(HTML_OK, "text/plain", response);
     });
 
-    server.begin();
+    server.on("/lcs", HTTP_GET, [](AsyncWebServerRequest *request) {
 
-    Serial.println("begin server");
+        if (request->hasParam(Cooler.parameters.duty_cycle)) {
+
+            Cooler.rotate(
+                request->getParam(Cooler.parameters.duty_cycle)->value().toFloat()
+            );
+
+        }
+
+        if (request->hasParam(Cooler.parameters.state)) {
+
+            Cooler.power(
+                request->getParam(Cooler.parameters.state)->value()
+            );
+
+        }
+
+        String response = "[{'duty_cycle': " + String(Cooler.duty_cycle) + ", " +
+            "'lcs_state': " + "'" + Cooler.state + "'}]";
+
+        Serial.println(response);
+
+        request->send(HTML_OK, "text/plain");
+
+    });
+
+    server.on("/lcs_initiate", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+        String response = "[{'duty_cycle': " + String(Cooler.duty_cycle) + ", " +
+            "'lcs_state': "  + "'" + Cooler.state + "'" + ", " +
+            "'min': " + "'" + String(Cooler.range.min) + "'" + ", " +
+            "'step': " + "'" + String(Cooler.range.step) + "'" + ", " +
+            "'max': " + "'" + String(Cooler.range.max) + "'}]";
+
+        Serial.println(response);
+
+        request->send(HTML_OK, "text/plain", response);
+
+    });
+
+    server.begin();
 
 }
 
@@ -238,7 +284,7 @@ void setup() {
     timerAttachInterrupt(timer, &timerhandle, true);
     timerAlarmWrite(timer, duration * 1e6, true);
 
-    timerAlarmEnable(timer);
+    //timerAlarmEnable(timer);
 
     initiate_web();
 
