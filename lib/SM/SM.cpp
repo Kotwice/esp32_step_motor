@@ -1,70 +1,42 @@
 #include <SM.h>
 
-SM::SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst, String nm, int pwmchannel) {
+SM::SM(int PIN_STEP, int PIN_SLEEP, int PWM_CHANNEL, String NAME) {
 
-    step_angle = motor.step_angle;
-    range = motor.range;
+    pin_step = PIN_STEP;
+    pin_sleep = PIN_SLEEP;
+    pwm_channel = PWM_CHANNEL;
 
-    name.frequency = "sm_frequency_" + nm;
-    name.state = "sm_state_" + nm;
+    parameters.frequency = "sm_frequency_" + NAME;
+    parameters.state = "sm_state_" + NAME;
 
-    pwm_channel = pwmchannel;
-
-    pin_direction = dir;
-    pin_step = stp;
-    pin_sleep = slp;
-    pin_reset = rst;
-
-    //pinMode(pin_direction, OUTPUT);
     pinMode(pin_sleep, OUTPUT);
-    //pinMode(pin_reset, OUTPUT);
-
-    //digitalWrite(pin_direction, HIGH);
     digitalWrite(pin_sleep, LOW);
-    //digitalWrite(pin_reset, HIGH);
 
     ledcAttachPin(pin_step, pwm_channel);
 
 }
 
-void SM::pause(float duration) {
-    float origin = millis();
-    while (millis() - origin < duration * 1e3) {    }
-}
+void SM::rotate(float FREQUENCY) {
 
-void SM::move() {
+    frequency = FREQUENCY;
 
     digitalWrite(pin_sleep, HIGH);
 
     ledcSetup(pwm_channel, frequency * 360 / step_angle, resolution);
     ledcWrite(pwm_channel, dutyCycle);
 
+
 }
 
-void SM::rotate(float duration = 0) {
+void SM::power (String STATE) {
 
-    if (duration == 0) {
-        move();
+    state = STATE;
+
+    if (state == "on") {
+        digitalWrite(pin_sleep, HIGH);
     }
     else {
-        move();
-        pause(duration);
-        stop();
+        digitalWrite(pin_sleep, LOW);
     }
-
-}
-
-void SM::stop() {
-
-    digitalWrite(pin_sleep, LOW);
-    ledcWrite(pwm_channel, 0);
-
-}
-
-void SM::reset() {
-
-    digitalWrite(pin_reset, LOW);
-    digitalWrite(pin_reset, HIGH);
-    ledcWrite(pwm_channel, 0);
 
 }

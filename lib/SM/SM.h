@@ -1,37 +1,32 @@
 #include <Arduino.h>
 
-struct range_frequency {
-    float min, step, max;
-};
-
-struct Names {
-    String frequency, state;
-};
-
-struct SM_PROPORTIES {
-    float step_angle;
-    struct range_frequency range;
-};
-
 class SM {
 
     public:
-        SM(SM_PROPORTIES motor, int dir, int stp, int slp, int rst, String nm, int pwmchannel);
-        void reset();
-        void rotate(float duration);
-        void stop();
-        void pause(float duration);
-        void move();
+        SM(int PIN_STEP, int PIN_SLEEP, int PWM_CHANNEL, String NAME);
+
+        void power(String STATE);
+        void rotate(float FREQUENCY);
+
         float frequency = 0;
-        struct range_frequency range;
-        String state = "OFF";
-        struct Names name;
+        String state = "off";
+        struct {
+
+            float min = 0.5;
+            float step = 0.1; 
+            float max = 3;
+
+        } range;
+
+        struct {
+            String frequency, state;
+        } parameters;
 
     private:
         int pin_direction, pin_step, pin_sleep, pin_reset;
         int pwm_channel = 0;
         int resolution = 8;
-        int dutyCycle = 125;
-        float step_angle;
+        int dutyCycle = pow(2, resolution) - 1;
+        float step_angle = 1.8;
 
 };

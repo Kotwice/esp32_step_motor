@@ -44,17 +44,11 @@ std::vector<TC> Thermocouples {
     {SPITC_SCK, SPITC_MISO, SPITC_CS_1}, {SPITC_SCK, SPITC_MISO, SPITC_CS_2}
 };
 
-
-TC tc(SPITC_SCK, SPITC_MISO, SPITC_CS_1);
-
-
-SM_PROPORTIES engine = {1.8, {0.5, 0.1, 3}};
-
 LCS Cooler (LCS_RELAY, LCS_PWM, 6);
 
 std::vector<SM> Engines {
-    {engine, SM1_DIR, SM1_STP, SM1_SLP, SM1_RST, "1", 0},
-    {engine, SM2_DIR, SM2_STP, SM2_SLP, SM2_RST, "2", 8}
+    {SM1_STP, SM1_SLP, 0, "1"},
+    {SM2_STP, SM2_SLP, 8, "2"}
 };
 
 struct WebFile {
@@ -125,11 +119,7 @@ void initiate_web () {
 
     WiFi.softAP(ssid, password);
 
-    Serial.println("load wifi");
-
     IPAddress IP = WiFi.softAPIP();
-
-    Serial.println(IP);
     
     for (WebFile webfile: webfiles) {
         
@@ -149,32 +139,23 @@ void initiate_web () {
         }
 
     }
-
-    Serial.println("load data wifi");
     
     server.on("/sm", HTTP_GET, [](AsyncWebServerRequest *request) {
 
         for (std::vector<SM>::iterator Engine = Engines.begin(); Engine != Engines.end(); Engine++) {
-            if (request->hasParam(Engine->name.frequency)) {
-                Serial.println(Engine->name.frequency);
-                Engine->frequency = request->getParam(Engine->name.frequency)->value().toFloat();
-                if (Engine->state == "ON") {
-                    Engine->move();
-                }
-                else {
-                    Engine->stop();
-                }
+
+            if (request->hasParam(Engine->parameters.frequency)) {
+                 Engine->rotate(
+                    request->getParam(Engine->parameters.frequency)->value().toFloat()
+                );
             }
-            if (request->hasParam(Engine->name.state)) {
-                Engine->state = request->getParam(Engine->name.state)->value();
-                Serial.println(Engine->name.state);
-                if (Engine->state == "ON") {
-                    Engine->move();
-                }
-                else {
-                    Engine->stop();
-                }
+
+            if (request->hasParam(Engine->parameters.state)) {
+                Engine->power(
+                    request->getParam(Engine->parameters.state)->value()
+                );
             }
+
         }
 
         String response = "[";
@@ -204,8 +185,8 @@ void initiate_web () {
             String temporary = "{'frequency': " + String(Engine.frequency) + ", " + 
                 "'state': " + "'" + Engine.state + "'" + ", " + 
                 "'min': " + "'" + String(Engine.range.min) + "'" + ", " +
-                "'max': " + "'" + String(Engine.range.max) + "'" + ", " +
-                "'step': " + "'" + String(Engine.range.step) + "'" + 
+                "'step': " + "'" + String(Engine.range.step) + "'" + ", " +
+                "'max': " + "'" + String(Engine.range.max) + "'" + 
                 "}, ";
             response = response + temporary;
         }
@@ -249,7 +230,7 @@ void initiate_web () {
     server.on("/lcs_initiate", HTTP_GET, [](AsyncWebServerRequest *request) {
 
         String response = "[{'duty_cycle': " + String(Cooler.duty_cycle) + ", " +
-            "'lcs_state': "  + "'" + Cooler.state + "'" + ", " +
+            "'state': "  + "'" + Cooler.state + "'" + ", " +
             "'min': " + "'" + String(Cooler.range.min) + "'" + ", " +
             "'step': " + "'" + String(Cooler.range.step) + "'" + ", " +
             "'max': " + "'" + String(Cooler.range.max) + "'}]";

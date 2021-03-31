@@ -23,10 +23,10 @@ sliders[0].onchange = function () {
 switches[0].onchange = function () {
     var xhttp = new XMLHttpRequest();    
     if (switches[0].checked) {
-        xhttp.open('GET', '/sm?sm_state_1=ON', true);
+        xhttp.open('GET', '/sm?sm_state_1=on', true);
     }
     else {
-        xhttp.open('GET', '/sm?sm_state_1=OFF', true);
+        xhttp.open('GET', '/sm?sm_state_1=off', true);
     }
     xhttp.send();
 };
@@ -44,10 +44,10 @@ sliders[1].onchange = function () {
 switches[1].onchange = function () {
     var xhttp = new XMLHttpRequest();    
     if (switches[1].checked) {
-        xhttp.open('GET', '/sm?sm_state_2=ON', true);
+        xhttp.open('GET', '/sm?sm_state_2=on', true);
     }
     else {
-        xhttp.open('GET', '/sm?sm_state_2=OFF', true);
+        xhttp.open('GET', '/sm?sm_state_2=off', true);
     }
     xhttp.send();
 };
@@ -61,12 +61,12 @@ function sm_initiate () {
             data = JSON.parse(data);            
             for (let i = 0; i < data.length; i++) {
 
-                sliders[i].setAttribute('value', data[i].frequency);
                 sliders[i].setAttribute('min', data[i].min);
                 sliders[i].setAttribute('max', data[i].max);
                 sliders[i].setAttribute('step', data[i].step);
+                sliders[i].setAttribute('value', data[i].frequency);
 
-                if (data[i].sm_state == 'ON') {
+                if (data[i].state == 'on') {
                     switches[i].checked = true;
                 }
                 else {

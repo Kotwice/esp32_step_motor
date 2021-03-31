@@ -43,28 +43,24 @@ function lcs_initiate () {
 
             for (let i = 0; i < data.length; i++) {
 
-                sliders[i].setAttribute('value', data[i].duty_cycle);
                 sliders[i].setAttribute('min', data[i].min);
                 sliders[i].setAttribute('max', data[i].max);
                 sliders[i].setAttribute('step', data[i].step);
 
+                sliders[i].setAttribute('value', data[i].duty_cycle);
+
                 labels[i].innerHTML = 'Скважность: ' + sliders[i].value;
 
-                //if ('lcs_state' in data[i]) {
+                if (data[i].state == 'on') {
 
-                    if (data[i].lcs_state == 'on') {
+                    switches[0].checked = true;
 
-                        switches[0].checked = true;
+                }
+                else {
 
-                    }
-                    else {
+                    switches[0].checked = false;
 
-                        switches[0].checked = false;
-
-                    } 
-
-                //}
-               
+                } 
 
             }          
         }
