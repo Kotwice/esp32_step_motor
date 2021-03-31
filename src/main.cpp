@@ -6,6 +6,8 @@
 #include <SPIFFS.h>
 #include <vector>
 #include <LCS.h>
+#include <HT.h>
+#include <PID.h>
 
 //#include <WS.h>
 
@@ -18,15 +20,13 @@ IPAddress subnet(255, 255, 255, 0);
 
 AsyncWebServer server(80);
 
-#define SM1_DIR 0
-#define SM1_STP 27
-#define SM1_SLP 26
-#define SM1_RST 0
+#define SM1_PIN_STEP 27
+#define SM1_PIN_SLEEP 26
+#define SM1_PWM_CHANNEL 0
 
-#define SM2_DIR 0
-#define SM2_STP 12
-#define SM2_SLP 14
-#define SM2_RST 0
+#define SM2_PIN_STEP 12
+#define SM2_PIN_SLEEP 14
+#define SM2_PWM_CHANNEL 8
 
 #define SPITC_MISO 25
 #define SPITC_SCK 32
@@ -36,20 +36,34 @@ AsyncWebServer server(80);
 #define LCS_PWM 23
 #define LCS_RELAY 13
 
+#define HT1_PIN_PWM 0
+#define HT2_PIN_PWM 0
+
+#define HT1_PWM_CHANNEL 0
+#define HT2_PWM_CHANNEL 0
+
 #define HTML_OK 200
 
 hw_timer_t * timer = NULL;
 
-std::vector<TC> Thermocouples {
-    {SPITC_SCK, SPITC_MISO, SPITC_CS_1}, {SPITC_SCK, SPITC_MISO, SPITC_CS_2}
-};
-
 LCS Cooler (LCS_RELAY, LCS_PWM, 6);
 
-std::vector<SM> Engines {
-    {SM1_STP, SM1_SLP, 0, "1"},
-    {SM2_STP, SM2_SLP, 8, "2"}
+std::vector<TC> Thermocouples {
+    {SPITC_SCK, SPITC_MISO, SPITC_CS_1, "1"}, 
+    {SPITC_SCK, SPITC_MISO, SPITC_CS_2, "2"}
 };
+
+std::vector<SM> Engines {
+    {SM1_PIN_STEP, SM1_PIN_SLEEP, SM1_PWM_CHANNEL, "1"},
+    {SM2_PIN_STEP, SM2_PIN_SLEEP, SM2_PWM_CHANNEL, "2"}
+};
+
+std::vector<HT> Heaters {
+    {HT1_PIN_PWM, HT1_PWM_CHANNEL, "1"},
+    {HT2_PIN_PWM, HT2_PWM_CHANNEL, "2"}
+};
+
+std::vector<PID> Regulators;
 
 struct WebFile {
     String url, path, type;
@@ -241,17 +255,81 @@ void initiate_web () {
 
     });
 
+    server.on("/hs_initiate", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+        String response = "[";
+
+        for (PID Regulator: Regulators) {
+
+            String temporary = "{'i': " + String(Regulator.coefficients.i) + ", " + 
+                "'p': " + "'" + String(Regulator.coefficients.p) + "'" + 
+                "'d': " + "'" + String(Regulator.coefficients.d) + "'" + 
+                "'destination': " + "'" + String(Regulator.destination) + "'" + 
+                "'state': " + "'" + String(Regulator.state) + "'" + 
+                "}, ";
+            response = response + temporary;
+        }
+
+        response.remove(response.length() - 2, 2);
+
+        response = response + "]";
+
+        Serial.println(response);
+
+        request->send(HTML_OK, "text/plain", response);
+
+    });
+
+    server.on("/hs", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+        for (std::vector<PID>::iterator Regulator = Regulators.begin(); 
+            Regulator != Regulators.end(); Regulator++) {
+
+            if (request->hasParam(Regulator->parameters.i)) {
+                Regulator->coefficients.i = request->getParam(Regulator->parameters.i)->value().toFloat();
+            }
+
+            if (request->hasParam(Regulator->parameters.p)) {
+                Regulator->coefficients.p = request->getParam(Regulator->parameters.p)->value().toFloat();
+            }
+
+            if (request->hasParam(Regulator->parameters.d)) {
+                Regulator->coefficients.d = request->getParam(Regulator->parameters.d)->value().toFloat();
+            }
+
+            if (request->hasParam(Regulator->parameters.destination)) {
+                Regulator->destination = request->getParam(Regulator->parameters.destination)->value().toFloat();
+            }
+
+            if (request->hasParam(Regulator->parameters.state)) {
+                Regulator->state = request->getParam(Regulator->parameters.state)->value();
+            }
+
+        }
+
+        request->send(HTML_OK, "text/plain");
+
+    });
+
     server.begin();
 
 }
 
 void IRAM_ATTR timerhandle () {
 
+    for (int i = 0; i < Regulators.size(); i++) {
+        Thermocouples[i].probe();
+        Regulators[i].calculate(Thermocouples[i].mesument);
+        Heaters[i].heat(Regulators[i].control);
+    }
+    /*
     for (std::vector<TC>::iterator Thermocouple = Thermocouples.begin(); 
         Thermocouple != Thermocouples.end(); Thermocouple++) {
             Thermocouple->probe();
-            Serial.println(Thermocouple->value);
+            //Regulator->calculate(Thermocouple->mesument);
+            //Heater->heat(Regulator->control);
         }
+        */
     
 }
 

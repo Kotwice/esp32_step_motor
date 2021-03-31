@@ -23,8 +23,7 @@ class SM {
         } parameters;
 
     private:
-        int pin_direction, pin_step, pin_sleep, pin_reset;
-        int pwm_channel = 0;
+        int pin_step, pin_sleep, pwm_channel;
         int resolution = 8;
         int dutyCycle = pow(2, resolution) - 1;
         float step_angle = 1.8;

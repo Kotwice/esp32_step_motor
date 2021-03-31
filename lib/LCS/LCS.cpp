@@ -7,11 +7,9 @@ LCS::LCS(int PIN_RELAY, int PIN_PWM, int PWM_CHANNEL) {
     pwm_channel = PWM_CHANNEL;
 
     pinMode(pin_relay, OUTPUT);
-
     digitalWrite(pin_relay, LOW);
 
     ledcAttachPin(pin_pwm, pwm_channel);
-
     ledcSetup(pwm_channel, frequency, resolution);
 
     rotate(duty_cycle);

@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <vector>
 
 class LCS {
 
@@ -31,9 +30,7 @@ class LCS {
         } range;
 
     private:
-        int pin_relay;
-        int pin_pwm;
-        int pwm_channel;
+        int pin_relay, pin_pwm, pwm_channel;
         int resolution = 8;
         float frequency = 1e3;
 

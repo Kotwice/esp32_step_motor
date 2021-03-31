@@ -3,17 +3,22 @@
 class TC {
 
   public:
-    TC(int8_t sck, int8_t miso, int8_t cs);
-    void probe();  
-    float value = 0;
-    //void (TC::*T)() = &TC::get_temperature;
 
-    
+    TC(int PIN_SCK, int PIN_MISO, int PIN_CS, String NAME);
+
+    void probe();  
+
+    float mesument = 0;
+
+    struct {
+      String temperature;
+    } parameters;
+
   private:
-    int8_t SCK, MISO, CS;
+
+    int pin_sck, pin_miso, pin_cs;
+
     uint8_t spi_transfer();
-    void pause(float duration);
-    //hw_timer_t * timer = NULL;
 
 };
 

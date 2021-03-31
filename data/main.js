@@ -21,6 +21,14 @@ $(document).ready(function () {
         $('.contentbar').toggleClass('contentbar-open');
         $('.contentbar').toggleClass('contentbar-close', false); 
         $('.sidebarBth').toggleClass('toggle');
+        $('.contentbar').load('hs.html');                      
+    });
+    $('.item-2').click(function () {
+        $('.sidebar').toggleClass('sidebar-close');
+        $('.sidebar').toggleClass('sidebar-open', false);               
+        $('.contentbar').toggleClass('contentbar-open');
+        $('.contentbar').toggleClass('contentbar-close', false); 
+        $('.sidebarBth').toggleClass('toggle');
         $('.contentbar').load('lcs.html');                      
     });
 })

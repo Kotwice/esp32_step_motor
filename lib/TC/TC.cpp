@@ -1,22 +1,18 @@
 #include <TC.h>
 
-TC::TC(int8_t sck, int8_t miso, int8_t cs) {
+TC::TC(int PIN_SCK, int PIN_MISO, int PIN_CS, String NAME) {
 
-    SCK = sck;
-    CS = cs;
-    MISO = miso;
+    pin_sck = PIN_SCK;
+    pin_miso = PIN_MISO;
+    pin_cs = PIN_CS;
 
-    pinMode(SCK, OUTPUT);
-    pinMode(CS, OUTPUT);
-    pinMode(MISO, INPUT);
+    parameters.temperature = "tc_temperature" + NAME;
 
-    digitalWrite(CS, HIGH);
+    pinMode(pin_sck, OUTPUT);
+    pinMode(pin_cs, OUTPUT);
+    pinMode(pin_miso, INPUT);
 
-    //timer = timerBegin(0, 80, true);
-    //timerAttachInterrupt(timer, &T, true);
-    //timerAlarmWrite(timer, duration * 1e6, true);
-
-    //timerAlarmEnable(timer);
+    digitalWrite(pin_cs, HIGH);
 
 }
 
@@ -24,31 +20,25 @@ void TC::probe() {
 
     uint16_t temporary;
 
-    digitalWrite(CS, LOW);
-    //pause(10);
+    digitalWrite(pin_cs, LOW);
     delayMicroseconds(10);
 
     temporary = spi_transfer();
     temporary <<= 8;
     temporary |= spi_transfer();
 
-    digitalWrite(CS, HIGH);
+    digitalWrite(pin_cs, HIGH);
 
     if (temporary & 0x4) {
 
-        value = NAN;
+        mesument = NAN;
 
     }
 
     temporary >>= 3;
 
-    value = temporary * 0.25;
+    mesument = temporary * 0.25;
   
-}
-
-void TC::pause(float duration) {
-    float origin = millis();
-    while (millis() - origin < duration) {    }
 }
 
 byte TC::spi_transfer() {
@@ -58,7 +48,6 @@ byte TC::spi_transfer() {
     for (int i = 7; i >= 0; i--) {
 
         digitalWrite(SCK, LOW);
-        //pause(10);
         delayMicroseconds(10);
 
         if (digitalRead(MISO)) {
@@ -68,7 +57,6 @@ byte TC::spi_transfer() {
         }
 
         digitalWrite(SCK, HIGH);
-        //pause(10);
         delayMicroseconds(10);
 
     }
