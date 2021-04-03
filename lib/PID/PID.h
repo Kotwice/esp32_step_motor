@@ -20,7 +20,7 @@ class PID {
             float previously = 30, current;
         } mesuments, errors;
 
-        float control, destination, duration;
+        float control = 0, destination, duration;
 
         void calculate (float MESUMENT);
 

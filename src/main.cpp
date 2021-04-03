@@ -20,25 +20,26 @@ IPAddress subnet(255, 255, 255, 0);
 
 AsyncWebServer server(80);
 
-#define SM1_PIN_STEP 27
-#define SM1_PIN_SLEEP 26
+#define SM1_PIN_STEP 13
+#define SM1_PIN_SLEEP 12
 #define SM1_PWM_CHANNEL 0
 
-#define SM2_PIN_STEP 12
-#define SM2_PIN_SLEEP 14
+#define SM2_PIN_STEP 14
+#define SM2_PIN_SLEEP 27
 #define SM2_PWM_CHANNEL 10
 
-#define SPITC_MISO 25
-#define SPITC_SCK 32
+#define SPITC_MISO 26
+#define SPITC_SCK 25
 #define SPITC_CS_1 33
-#define SPITC_CS_2 13
+#define SPITC_CS_2 32
+#define SPITC_CS_3 18
 
 #define LCS_PWM 23
-#define LCS_RELAY 13
+#define LCS_RELAY 19
 #define LCS_PWM_CHANNEL 4
 
-#define HT1_PIN_PWM 18
-#define HT2_PIN_PWM 19
+#define HT1_PIN_PWM 22
+#define HT2_PIN_PWM 21
 
 #define HT1_PWM_CHANNEL 6
 #define HT2_PWM_CHANNEL 8
@@ -47,11 +48,15 @@ AsyncWebServer server(80);
 
 hw_timer_t * timer = NULL;
 
+float duration = 2;
+float destination[2] = {200, 180};
+
 LCS Cooler (LCS_RELAY, LCS_PWM, LCS_PWM_CHANNEL);
 
 std::vector<TC> Thermocouples {
     {SPITC_SCK, SPITC_MISO, SPITC_CS_1, "1"}, 
-    {SPITC_SCK, SPITC_MISO, SPITC_CS_2, "2"}
+    {SPITC_SCK, SPITC_MISO, SPITC_CS_2, "2"},
+    {SPITC_SCK, SPITC_MISO, SPITC_CS_3, "3"}
 };
 
 std::vector<SM> Engines {
@@ -65,7 +70,7 @@ std::vector<HT> Heaters {
 };
 
 std::vector<PID> Regulators {
-    {200, 1, 0.5, 0.5, 0.5, "1"}, {180, 1, 0.5, 0.5, 0.5, "2"}
+    {destination[0], duration, 0.5, 0.5, 0.5, "1"}, {destination[1], duration, 0.5, 0.5, 0.5, "2"}
 };
 
 struct WebFile {
@@ -264,11 +269,11 @@ void initiate_web () {
 
         for (PID Regulator: Regulators) {
 
-            String temporary = "{'i': " + String(Regulator.coefficients.i) + ", " + 
-                "'p': " + String(Regulator.coefficients.p) + ", " + 
-                "'d': " + String(Regulator.coefficients.d) + ", " + 
-                "'destination': " + String(Regulator.destination) + ", " + 
-                "'state': " + String(Regulator.state) + "'" + 
+            String temporary = "{'i': '" + String(Regulator.coefficients.i) + "', " + 
+                "'p': '" + String(Regulator.coefficients.p) + "', " + 
+                "'d': '" + String(Regulator.coefficients.d) + "', " + 
+                "'destination': '" + String(Regulator.destination) + "', " + 
+                "'state': '" + String(Regulator.state) + "'" + 
                 "}, ";
             response = response + temporary;
         }
@@ -310,48 +315,115 @@ void initiate_web () {
 
         }
 
+        String response = "[";
+
+        for (PID Regulator: Regulators) {
+
+            String temporary = "{'i': '" + String(Regulator.coefficients.i) + "', " + 
+                "'p': '" + String(Regulator.coefficients.p) + "', " + 
+                "'d': '" + String(Regulator.coefficients.d) + "', " + 
+                "'destination': '" + String(Regulator.destination) + "', " + 
+                "'state': '" + String(Regulator.state) + "'" + 
+                "}, ";
+            response = response + temporary;
+        }
+
+        response.remove(response.length() - 2, 2);
+
+        response = response + "]";
+
+        Serial.println(response);
+
         request->send(HTML_OK, "text/plain");
 
+    });
+
+    server.on("/temperatures", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+        String response = "[";
+
+        for (std::vector<TC>::iterator Thermocouple = Thermocouples.begin(); 
+            Thermocouple != Thermocouples.end(); Thermocouple++) {
+
+            String temporary = "{'mesument': '" + String(Thermocouple->mesument) + "'}, ";
+            response = response + temporary;
+
+        }
+
+        response.remove(response.length() - 2, 2);
+
+        response = response + "]";
+
+        Serial.println(response);
+
+        request->send(HTML_OK, "text/plain", response);
+        
+    });
+
+    server.on("/controls", HTTP_GET, [](AsyncWebServerRequest *request) {
+
+        String response = "[";
+
+        for (std::vector<PID>::iterator Regulator = Regulators.begin(); 
+            Regulator != Regulators.end(); Regulator++) {
+
+            String temporary = "{'control': '" + String(Regulator->control) + "'}, ";
+            response = response + temporary;
+
+        }
+
+        response.remove(response.length() - 2, 2);
+
+        response = response + "]";
+
+        Serial.println(response);
+
+        request->send(HTML_OK, "text/plain", response);
+        
     });
 
     server.begin();
 
 }
 
-void IRAM_ATTR timerhandle () {
+
+//IRAM_ATTR
+void timerhandle () {
+    
+    for (int i = 0; i < Regulators.size(); i++) {
+        Thermocouples[i].probe();
+        Regulators[i].calculate(Thermocouples[i].mesument);
+        Heaters[i].heat(Regulators[i].control);
+    }
+    
+}
+
+
+void setup() {
+
+    Serial.begin(9600);
+
+    timer = timerBegin(0, 80, true);
+    timerAttachInterrupt(timer, &timerhandle, true);
+    timerAlarmWrite(timer, duration * 1e7, true);
+
+    //timerAlarmEnable(timer);
+
+
+    initiate_web();
+
+    
+
+}
+
+void loop() {
+
+    delay(1000);
 
     for (int i = 0; i < Regulators.size(); i++) {
         Thermocouples[i].probe();
         Regulators[i].calculate(Thermocouples[i].mesument);
         Heaters[i].heat(Regulators[i].control);
     }
-    /*
-    for (std::vector<TC>::iterator Thermocouple = Thermocouples.begin(); 
-        Thermocouple != Thermocouples.end(); Thermocouple++) {
-            Thermocouple->probe();
-            //Regulator->calculate(Thermocouple->mesument);
-            //Heater->heat(Regulator->control);
-        }
-        */
-    
-}
-
-void setup() {
-
-    Serial.begin(9600);
-
-    float duration = 2;
-
-    timer = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer, &timerhandle, true);
-    timerAlarmWrite(timer, duration * 1e6, true);
-
-    //timerAlarmEnable(timer);
-
-    initiate_web();
-
-}
-
-void loop() {
 
 }

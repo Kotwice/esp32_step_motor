@@ -11,7 +11,6 @@ inputs[5] = document.getElementById('input-2-p');
 inputs[6] = document.getElementById('input-2-d');
 inputs[7] = document.getElementById('input-2-destination');
 
-/*
 inputs[0].onchange = function () {
     var xhttp = new XMLHttpRequest();
     xhttp.open('GET', '/hs?pid_i_1=' + inputs[0].value, true);
@@ -59,7 +58,7 @@ inputs[7].onchange = function () {
     xhttp.open('GET', '/hs?pid_destination_2=' + this.value, true);
     xhttp.send();
 }
-*/
+
 var switches = new Array();
 
 switches[0] = document.getElementById('switch-1');
@@ -139,5 +138,57 @@ function hs_initiate () {
     xhttp.send();
 
 }
+
+var Time_Step = 2000;
+
+var mesumets = new Array();
+
+mesumets[0] = document.getElementById('temperature-1');
+mesumets[1] = document.getElementById('temperature-2');
+
+var controls = new Array();
+
+controls[0] = document.getElementById('duty-cycle-1');
+controls[1] = document.getElementById('duty-cycle-2');
+
+function get_temperatures () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var data = this.responseText;
+            data = data.replace(/'/g, '"');            
+            data = JSON.parse(data);            
+            mesumets[0].innerHTML = 'T1 = ' + data[0].mesument + ' [degC]';
+            mesumets[1].innerHTML = 'T2 = ' + data[1].mesument  + ' [degC]';
+        }
+    };
+    xhttp.open('GET', '/temperatures', true);
+    xhttp.send();
+}
+
+function get_controls () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var data = this.responseText;
+            data = data.replace(/'/g, '"');            
+            data = JSON.parse(data);            
+            controls[0].innerHTML = 'Скважность: ' + data[0].control;
+            controls[1].innerHTML = 'Скважность: ' + data[1].control;
+        }
+    };
+    xhttp.open('GET', '/controls', true);
+    xhttp.send();
+}
+
+setTimeout(() => {
+    get_temperatures();
+    get_controls();
+});
+
+setInterval(() => {
+    get_temperatures();    
+    get_controls();
+}, Time_Step);
 
 hs_initiate();

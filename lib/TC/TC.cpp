@@ -47,16 +47,16 @@ byte TC::spi_transfer() {
 
     for (int i = 7; i >= 0; i--) {
 
-        digitalWrite(SCK, LOW);
+        digitalWrite(pin_sck, LOW);
         delayMicroseconds(10);
 
-        if (digitalRead(MISO)) {
+        if (digitalRead(pin_miso)) {
 
-        temporary |= (1 << i);
+            temporary |= (1 << i);
 
         }
 
-        digitalWrite(SCK, HIGH);
+        digitalWrite(pin_sck, HIGH);
         delayMicroseconds(10);
 
     }

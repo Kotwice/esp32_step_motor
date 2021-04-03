@@ -4,16 +4,16 @@
 
         <p>Настройка параметров регулирования 1-го нагревателя</p> 
 
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-i' id = 'input-1-i'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-1-i' id = 'input-1-i'>
         <label class = 'label' for = 'input-1-i'>Ki</label>
 
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-p' id = 'input-1-p'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-1-p' id = 'input-1-p'>
         <label class = 'label' for = 'input-1-p'>Kd</label>
 
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-d' id = 'input-1-d'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-1-d' id = 'input-1-d'>
         <label class = 'label' for = 'input-1-d'>Kd</label>
 
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-1-destination' id = 'input-1-destination'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-1-destination' id = 'input-1-destination'>
         <label class = 'label' for = 'input-1-destination'>Точка регулирования</label>
 
         <p>Включение 1-го нагревателя</p>
@@ -25,22 +25,25 @@
             </label>
         </p>
 
+        <p id = 'temperature-1'></p>
+        <p id = 'duty-cycle-1'></p>
+
     </div>
     
     <div>
 
         <p>Настройка параметров регулирования 2-го нагревателя</p> 
     
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-i' id = 'input-2-i'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-2-i' id = 'input-2-i'>
         <label class = 'label' for = 'input-2-i'>Ki</label>
     
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-p' id = 'input-2-p'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-2-p' id = 'input-2-p'>
         <label class = 'label' for = 'input-2-p'>Kd</label>
     
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-d' id = 'input-2-d'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-2-d' id = 'input-2-d'>
         <label class = 'label' for = 'input-2-d'>Kd</label>
     
-        <input class = 'input' type = 'number' inputmode = 'numeric' name = 'input-2-destination' id = 'input-2-destination'>
+        <input class = 'input' type = 'number' inputmode = 'decimal' name = 'input-2-destination' id = 'input-2-destination'>
         <label class = 'label' for = 'input-2-destination'>Точка регулирования</label>
     
         <p>Включение 2-го нагревателя</p>
@@ -52,6 +55,9 @@
             </label>
         </p>
     
+        <p id = 'temperature-2'></p>
+        <p id = 'duty-cycle-2'></p>
+
     </div>
 
 </main>

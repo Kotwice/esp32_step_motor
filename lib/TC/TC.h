@@ -18,7 +18,7 @@ class TC {
 
     int pin_sck, pin_miso, pin_cs;
 
-    uint8_t spi_transfer();
+    byte spi_transfer();
 
 };
 

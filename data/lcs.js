@@ -69,4 +69,32 @@ function lcs_initiate () {
     xhttp.send();
 }
 
+var Time_Step = 2000;
+
+var mesumets = new Array();
+
+mesumets[0] = document.getElementById('temperature-1');
+
+function get_temperatures () {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var data = this.responseText;
+            data = data.replace(/'/g, '"');            
+            data = JSON.parse(data);            
+            mesumets[0].innerHTML = 'T3 = ' + data[2].mesument + ' [degC]';
+        }
+    };
+    xhttp.open('GET', '/temperatures', true);
+    xhttp.send();
+}
+
+setTimeout(() => {
+    get_temperatures();
+});
+
+setInterval(() => {
+    get_temperatures();
+}, Time_Step);
+
 lcs_initiate();
