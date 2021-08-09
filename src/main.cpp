@@ -354,7 +354,7 @@ void initiate_web () {
 
         response = response + "]";
 
-        Serial.println(response);
+        //Serial.println(response);
 
         request->send(HTML_OK, "text/plain", response);
         
@@ -376,7 +376,7 @@ void initiate_web () {
 
         response = response + "]";
 
-        Serial.println(response);
+        //Serial.println(response);
 
         request->send(HTML_OK, "text/plain", response);
         
@@ -388,14 +388,25 @@ void initiate_web () {
 
 
 //IRAM_ATTR
-void timerhandle () {
-    
-    for (int i = 0; i < Regulators.size(); i++) {
+void  IRAM_ATTR timerhandle () {
+    /*
+    for (int i = 0; i < Thermocouples.size(); i++) {
         Thermocouples[i].probe();
         Regulators[i].calculate(Thermocouples[i].mesument);
         Heaters[i].heat(Regulators[i].control);
     }
-    
+    */
+
+    //Thermocouples[0].probe();
+    Regulators[0].calculate(Thermocouples[0].mesument);
+    //Heaters[0].heat(Regulators[0].control);
+
+    //Thermocouples[1].probe();
+    //Regulators[1].calculate(Thermocouples[1].mesument);
+    //Heaters[1].heat(Regulators[1].control);
+
+    //Thermocouples[2].probe();
+
 }
 
 
@@ -403,9 +414,9 @@ void setup() {
 
     Serial.begin(9600);
 
-    timer = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer, &timerhandle, true);
-    timerAlarmWrite(timer, duration * 1e7, true);
+    //timer = timerBegin(0, 80, true);
+    //timerAttachInterrupt(timer, &timerhandle, true);
+    //timerAlarmWrite(timer, duration * 1e6, true);
 
     //timerAlarmEnable(timer);
 
@@ -418,12 +429,17 @@ void setup() {
 
 void loop() {
 
+    
     delay(1000);
 
-    for (int i = 0; i < Regulators.size(); i++) {
+    for (int i = 0; i < Thermocouples.size(); i++) {
         Thermocouples[i].probe();
+    }
+
+    for (int i = 0; i < Regulators.size(); i++) {
         Regulators[i].calculate(Thermocouples[i].mesument);
         Heaters[i].heat(Regulators[i].control);
     }
+    
 
 }
